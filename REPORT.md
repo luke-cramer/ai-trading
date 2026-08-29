@@ -3,6 +3,7 @@
 **Date:** 2026-08-29 · **Phase 1 deliverable** for the ai-trading project.
 **Method:** 18-agent research workflow (13 parallel researchers across strategy/AI/market/base-rate beats, 1 adversarial critic, 3 gap-fill verifications), synthesized by hand. Every claim inherits an evidence tag: **[verified]** = primary source fetched (paper, regulator, exchange API, own replication) · **[anon]** = plausible but unverifiable practitioner account · **[promo]** = the source sells something. Raw research corpus: 17 files, preserved in the session scratchpad; key sources in the appendix.
 **Not investment advice.** This is a research synthesis for a personal learning project.
+**Web version:** https://claude.ai/code/artifact/729358ff-4141-45e4-8f51-059e2c7b0b48
 
 ---
 
