@@ -1,0 +1,51 @@
+name: carry-ingest
+# Twice an hour: funding is constant within the hour, so any minute captures it; the second run covers cron delays.
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: carry-data
+  cancel-in-progress: false
+
+jobs:
+  ingest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q pandas numpy
+      - name: Ingest all sources
+        run: python -m strategies.carry ingest
+      - name: Stale-data check (fails loudly if newest funding print > 3h old)
+        run: python -m strategies.carry check-stale
+      - name: Commit data
+        run: |
+          git config user.name "carry-bot"
+          git config user.email "carry-bot@users.noreply.github.com"
+          git add data/
+          git diff --cached --quiet && echo "no new rows" && exit 0
+          git commit -q -m "data(carry): ingest $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
+      - name: Alert on failure
+        if: failure()
+        run: |
+          python - <<'PY'
+          import os
+          from harness import alerts
+          alerts.send(f"carry-ingest workflow FAILED: {os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}", level="error")
+          PY

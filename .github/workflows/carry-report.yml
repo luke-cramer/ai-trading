@@ -1,0 +1,51 @@
+name: carry-report
+# Daily at 00:20 UTC (17:20 Pacific): recompute the daily series, write the markdown report, post the summary.
+on:
+  schedule:
+    - cron: "20 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: carry-data
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q pandas numpy
+      - name: Build and post daily report
+        run: python -m strategies.carry report
+      - name: Show report
+        run: cat reports/carry/latest.md >> "$GITHUB_STEP_SUMMARY"
+      - name: Commit report and daily table
+        run: |
+          git config user.name "carry-bot"
+          git config user.email "carry-bot@users.noreply.github.com"
+          git add data/carry/daily reports/carry
+          git diff --cached --quiet && echo "nothing to commit" && exit 0
+          git commit -q -m "report(carry): $(date -u +%Y-%m-%d)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
+      - name: Alert on failure
+        if: failure()
+        run: |
+          python - <<'PY'
+          import os
+          from harness import alerts
+          alerts.send(f"carry-report workflow FAILED: {os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}", level="error")
+          PY
