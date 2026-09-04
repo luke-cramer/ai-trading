@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.lukecramer.carry-ingest</string>
+  <key>ProgramArguments</key>
+  <array><string>/bin/bash</string><string>/Users/lukecramer/personal/ai-trading/bin/carry-local.sh</string></array>
+  <key>StartCalendarInterval</key>
+  <array>
+    <dict><key>Minute</key><integer>22</integer></dict>
+    <dict><key>Minute</key><integer>52</integer></dict>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin</string></dict>
+  <key>StandardOutPath</key><string>/tmp/carry-ingest.launchd.log</string>
+  <key>StandardErrorPath</key><string>/tmp/carry-ingest.launchd.log</string>
+</dict>
+</plist>
