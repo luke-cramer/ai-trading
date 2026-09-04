@@ -138,15 +138,17 @@ def ingest_cme(at: datetime) -> dict:
     return {"cme": T.CME.append(out), "cme_errors": errors}
 
 
-CRITICAL = ("cde", "spot")   # failures here fail the run; the rest are best-effort backfill sources
+SOURCES = {"cde": ingest_cde, "spot": ingest_spot, "cboe": ingest_cboe, "treasury": ingest_treasury, "cme": ingest_cme}
+HOURLY = ("cde", "spot", "cboe", "treasury")   # cme (Yahoo) is daily and often 429s from CI; run it with the report
+CRITICAL = ("cde", "spot")                     # failures here fail the run; the rest are best-effort backfill sources
 
 
-def run(at: datetime | None = None) -> dict:
+def run(at: datetime | None = None, sources: tuple[str, ...] = HOURLY) -> dict:
     at = at or now()
     summary: dict = {"at": iso(at)}
     errors = []
-    for name, fn in (("cde", ingest_cde), ("spot", ingest_spot), ("cboe", ingest_cboe),
-                     ("treasury", ingest_treasury), ("cme", ingest_cme)):
+    for name in sources:
+        fn = SOURCES[name]
         try:
             summary.update(fn(at))
         except Exception as e:

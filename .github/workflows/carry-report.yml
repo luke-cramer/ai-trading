@@ -25,6 +25,8 @@ jobs:
           python-version: "3.12"
           cache: pip
       - run: pip install -q pandas numpy
+      - name: Pull daily cross-check sources (CME closes via Yahoo; never fatal)
+        run: python -m strategies.carry ingest --sources cme,treasury,cboe
       - name: Build and post daily report
         run: python -m strategies.carry report
       - name: Show report
@@ -33,7 +35,7 @@ jobs:
         run: |
           git config user.name "carry-bot"
           git config user.email "carry-bot@users.noreply.github.com"
-          git add data/carry/daily reports/carry
+          git add data/ reports/carry
           git diff --cached --quiet && echo "nothing to commit" && exit 0
           git commit -q -m "report(carry): $(date -u +%Y-%m-%d)"
           for i in 1 2 3 4 5; do

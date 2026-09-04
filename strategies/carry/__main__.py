@@ -6,12 +6,14 @@ import json
 import sys
 
 from harness import alerts
+from strategies.carry.ingest import HOURLY, SOURCES
 
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(prog="carry")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("ingest", help="pull all sources once (idempotent)")
+    i = sub.add_parser("ingest", help="pull sources once (idempotent)")
+    i.add_argument("--sources", default=",".join(HOURLY), help=f"comma list from {','.join(SOURCES)}; default hourly set")
     r = sub.add_parser("report", help="recompute daily series, write markdown, post summary")
     r.add_argument("--no-post", action="store_true", help="do not post to the webhook")
     sub.add_parser("check-stale", help="exit 1 and alert if newest funding print is >3h old")
@@ -22,13 +24,14 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "ingest":
         from strategies.carry import ingest
         try:
-            s = ingest.run()
+            s = ingest.run(sources=tuple(a.sources.split(",")))
         except Exception as e:
             alerts.send(f"carry ingest FAILED: {e}", level="error")
             raise
         print(json.dumps(s))
-        if s.get("errors"):
-            alerts.send("carry ingest: non-critical source errors: " + "; ".join(s["errors"]), level="warn")
+        noisy = [e for e in s.get("errors", []) if not e.startswith("cme:")]
+        if noisy:
+            alerts.send("carry ingest: non-critical source errors: " + "; ".join(noisy), level="warn")
         return 0
     if a.cmd == "report":
         from strategies.carry import report
