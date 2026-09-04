@@ -2,7 +2,7 @@ name: carry-ingest
 # Twice an hour: funding is constant within the hour, so any minute captures it; the second run covers cron delays.
 on:
   schedule:
-    - cron: "7,37 * * * *"
+    - cron: "13,43 * * * *"
   workflow_dispatch:
 
 permissions:
