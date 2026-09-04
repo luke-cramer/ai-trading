@@ -46,6 +46,7 @@ strategies/taa/     build #1 (not started)      strategies/xs_gbm/   build #4 (n
 data/carry/<table>/YYYY-MM.csv   committed datasets      data/raw/carry/YYYY/MM/DD/   gz raw responses
 reports/carry/YYYY-MM-DD.md      daily reports (+ latest.md)
 .github/workflows/  carry-ingest (7,37 * * * *), carry-report (00:20 UTC), tests
+bin/carry-local.sh  laptop backup writer (launchd/ has the plist); same store, dedupes with the GHA job
 research/           phase-1 corpus (read-only)
 ```
 

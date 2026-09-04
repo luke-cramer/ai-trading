@@ -36,8 +36,19 @@ python3 -m venv .venv && .venv/bin/pip install pandas numpy pytest
 .venv/bin/python -m strategies.carry status
 ```
 
-Copy `.env.example` to `.env` and export `ALERT_WEBHOOK_URL` to test alerts locally. The same commands
-can run from a laptop `launchd` job as a backup writer; rows dedupe on timestamp so two writers are safe.
+Copy `.env.example` to `.env` and export `ALERT_WEBHOOK_URL` to test alerts locally.
+
+### Laptop backup writer (optional)
+
+GitHub's cron is best-effort and can skip slots. `bin/carry-local.sh` runs the same ingest from this
+checkout and pushes; rows dedupe on timestamp, so two writers are safe. Install it as a user launchd job
+(runs at :22 and :52 while the laptop is awake):
+
+```bash
+cp launchd/com.lukecramer.carry-ingest.plist ~/Library/LaunchAgents/ && launchctl load ~/Library/LaunchAgents/com.lukecramer.carry-ingest.plist
+```
+
+Remove with `launchctl unload` on the same path. Log: `reports/carry-local.log` (gitignored).
 
 ## What to watch
 
