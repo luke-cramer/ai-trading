@@ -1,0 +1,18 @@
+[project]
+name = "ai-trading"
+version = "0.1.0"
+description = "Personal trading research harness: ingestion -> signal -> paper -> report"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.2",
+    "numpy>=1.26",
+]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["harness", "strategies", "strategies.carry"]
