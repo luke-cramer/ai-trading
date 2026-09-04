@@ -15,7 +15,7 @@ Paper and logging only. No live brokerage, no real money, no leverage.
 
 GitHub Actions is the scheduler; the repo is the database.
 
-- `carry-ingest` runs at :13 and :43 every hour (triggered externally, see below). It pulls all sources, appends deduped rows under
+- `carry-ingest` runs every 10 minutes (plus external dispatches, see below). It pulls all sources, appends deduped rows under
   `data/carry/`, gzips the raw responses under `data/raw/carry/`, fails loudly if the newest funding print is
   more than 3 hours old, and commits.
 - `carry-report` runs daily at 00:20 UTC (17:20 Pacific). It recomputes `data/carry/daily/`, writes
@@ -23,34 +23,34 @@ GitHub Actions is the scheduler; the repo is the database.
 - `tests` runs pytest on every code push.
 
 Any failure posts to the webhook and shows up in the Actions tab. A missed hour is a permanent gap
-(the venue publishes no history), which is why ingest runs twice an hour.
+(the venue publishes no history), which is why ingest runs so often.
 
-### External trigger (required: GitHub's cron does not fire for this repo)
+### Two schedulers and a dead man's switch
 
-Both workflows declare a `schedule`, but on 2026-09-04 GitHub ran zero scheduled jobs in four hours
-(a 5-minute canary workflow never fired either, with Actions status operational). Until that changes,
-a free external pinger calls the GitHub API to dispatch each workflow. The cron lines stay in the
-workflows; if GitHub's scheduler wakes up, runs just dedupe.
+GitHub's cron is best-effort: on 2026-09-04 it ran nothing for four hours, then started (it also skipped
+a 5-minute canary entirely). Three things cover that, and each is independent of the others:
 
-1. **Token** — <https://github.com/settings/personal-access-tokens/new>: name `carry-dispatch`, expiration
-   1 year, Repository access → *Only select repositories* → `ai-trading`, Repository permissions →
-   *Actions: Read and write*. Generate and copy it. Nothing else needs it; do not put it in the repo.
-2. **Pinger** — <https://cron-job.org> (free). Create two cronjobs, timezone **UTC**, request method
-   **POST**, body `{"ref":"main"}`, headers:
+1. **GitHub cron** every 10 minutes (the repo is public, so Actions minutes are unlimited).
+2. **cron-job.org** (free) dispatches the same workflows through the GitHub API every 15 minutes. Setup:
+   - Token: <https://github.com/settings/personal-access-tokens/new>. Name `carry-dispatch`, expiration
+     1 year, Repository access → *Only select repositories* → `ai-trading`, Repository permissions →
+     *Actions: Read and write*. Copy it; it lives only in cron-job.org.
+   - Two cronjobs, timezone **UTC**, method **POST**, body `{"ref":"main"}`, headers
+     `Accept: application/vnd.github+json` and `Authorization: Bearer <token>`:
 
-   ```
-   Accept: application/vnd.github+json
-   Authorization: Bearer <the token>
-   ```
+     | Title | URL | Schedule (UTC) |
+     |---|---|---|
+     | carry-ingest | `https://api.github.com/repos/luke-cramer/ai-trading/actions/workflows/carry-ingest.yml/dispatches` | every 15 minutes |
+     | carry-report | `https://api.github.com/repos/luke-cramer/ai-trading/actions/workflows/carry-report.yml/dispatches` | 00:25 daily |
 
-   | Title | URL | Schedule (UTC) |
-   |---|---|---|
-   | carry-ingest | `https://api.github.com/repos/luke-cramer/ai-trading/actions/workflows/carry-ingest.yml/dispatches` | minutes 13 and 43, every hour |
-   | carry-report | `https://api.github.com/repos/luke-cramer/ai-trading/actions/workflows/carry-report.yml/dispatches` | 00:20 daily |
-
-   A successful dispatch returns HTTP 204 with an empty body; enable "save responses" to see it. The
-   run then appears in the Actions tab as `workflow_dispatch`.
-3. Put the token's expiry date in your calendar. When it lapses, ingest stops and the stale alert fires.
+   - A test run returns HTTP 204 (empty body) and a `workflow_dispatch` run appears in the Actions tab.
+     Duplicate runs are harmless: rows dedupe on timestamp and the concurrency group serializes commits.
+   - Calendar the token expiry. When it lapses only GitHub's cron remains.
+3. **healthchecks.io** (free) as a dead man's switch. The ingest job pings a URL after every success (and
+   `/fail` on failure); if no ping arrives for 90 minutes healthchecks messages you. This is what catches
+   scheduler silence, which the in-job stale check cannot. Setup: create a check with period 10 min,
+   grace 80 min, add your Slack (or email) integration, then set the ping URL as the repo secret
+   `HEALTHCHECK_URL`.
 
 ## Run locally
 
@@ -67,7 +67,7 @@ Copy `.env.example` to `.env` and export `ALERT_WEBHOOK_URL` to test alerts loca
 
 ### Laptop backup writer (optional)
 
-GitHub's cron is best-effort and can skip slots. `bin/carry-local.sh` runs the same ingest from this
+A third writer if you want one. `bin/carry-local.sh` runs the same ingest from this
 checkout and pushes; rows dedupe on timestamp, so two writers are safe. Install it as a user launchd job
 (runs at :22 and :52 while the laptop is awake):
 
@@ -83,7 +83,7 @@ Remove with `launchctl unload` on the same path. Log: `reports/carry-local.log` 
   missing, and the kill/go criteria checklist from `strategies/carry/PREREG.md`.
 - The webhook channel: one summary line per day, plus any failure or stale-data alert.
 - The Actions tab if the channel goes quiet for a day.
-- cron-job.org's execution history if runs stop appearing as `workflow_dispatch`.
+- healthchecks.io will message you if ingest stops pinging for 90 minutes.
 
 Nothing is decided before 60 complete days. The daily report is monitoring, not a decision.
 
@@ -91,8 +91,8 @@ Nothing is decided before 60 complete days. The daily report is monitoring, not 
 
 1. **Set the webhook secret** in the repo (Settings → Secrets → Actions → `ALERT_WEBHOOK_URL`), a Slack or
    Discord incoming-webhook URL. Until then alerts print into the workflow log only.
-2. **Keep the repo private.** It contains the dataset and daily reports.
-3. **Set up the external trigger** (token + cron-job.org) as described above. Without it nothing runs on a schedule.
+2. **Set the healthchecks secret** `HEALTHCHECK_URL` and the cron-job.org dispatcher, as described above.
+3. The repo is public: never commit `.env`, tokens, or account details. Secrets live in GitHub settings only.
 4. Later builds will need accounts (Alpaca paper for #1 and #4). Nothing here needs one.
 
 ## Data sources

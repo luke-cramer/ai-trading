@@ -45,7 +45,7 @@ strategies/carry/   build #2: tables.py (schemas) → ingest.py → signal.py (d
 strategies/taa/     build #1 (not started)      strategies/xs_gbm/   build #4 (not started)
 data/carry/<table>/YYYY-MM.csv   committed datasets      data/raw/carry/YYYY/MM/DD/   gz raw responses
 reports/carry/YYYY-MM-DD.md      daily reports (+ latest.md)
-.github/workflows/  carry-ingest (7,37 * * * *), carry-report (00:20 UTC), tests
+.github/workflows/  carry-ingest (every 10 min + cron-job.org dispatch), carry-report (00:20 UTC), tests
 bin/carry-local.sh  laptop backup writer (launchd/ has the plist); same store, dedupes with the GHA job
 research/           phase-1 corpus (read-only)
 ```

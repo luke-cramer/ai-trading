@@ -1,8 +1,9 @@
 name: carry-ingest
-# Twice an hour: funding is constant within the hour, so any minute captures it; the second run covers cron delays.
+# Every 10 min (public repo, minutes are free): the venue shows only its latest hourly print, so each hour
+# just needs one successful pull before the next print replaces it. cron-job.org dispatches as a backup (README).
 on:
   schedule:
-    - cron: "13,43 * * * *"
+    - cron: "3,13,23,33,43,53 * * * *"
   workflow_dispatch:
 
 permissions:
@@ -18,6 +19,7 @@ jobs:
     timeout-minutes: 10
     env:
       ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+      HEALTHCHECK_URL: ${{ secrets.HEALTHCHECK_URL }}   # healthchecks.io ping URL; dead man's switch on scheduler silence
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,9 +43,13 @@ jobs:
             sleep $((i * 5))
           done
           exit 1
+      - name: Heartbeat
+        if: env.HEALTHCHECK_URL != ''
+        run: curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL"
       - name: Alert on failure
         if: failure()
         run: |
+          [ -n "$HEALTHCHECK_URL" ] && curl -fsS -m 10 --retry 3 -o /dev/null "$HEALTHCHECK_URL/fail" || true
           python - <<'PY'
           import os
           from harness import alerts
