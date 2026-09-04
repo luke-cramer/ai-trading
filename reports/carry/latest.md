@@ -1,17 +1,17 @@
-# Carry measurement — daily report 2026-09-04 (generated 2026-09-04T19:30:51Z)
+# Carry measurement — daily report 2026-09-04 (generated 2026-09-04T21:24:37Z)
 
 ## Latest day: 2026-09-04 (UTC)
 
 | metric | value |
 |---|---|
-| BIP funding APR | +2.63% (1/24 hours) |
-| BIT front basis APR | +7.75% (BIT-25SEP26-CDE, 20.8 dte, 1 hrs) |
-| spread gross | -5.12% |
+| BIP funding APR | +2.63% (2/24 hours) |
+| BIT front basis APR | +8.05% (BIT-25SEP26-CDE, 20.8 dte, 2 hrs) |
+| spread gross | -5.43% |
 | cost drag | +1.98% |
-| **spread net** | **-7.10%** |
-| Cboe PBT funding APR (cross-check) | n/a |
+| **spread net** | **-7.41%** |
+| Cboe PBT funding APR (cross-check) | -1.87% |
 | CME front basis APR (cross-check, n/a) | n/a |
-| 4-week T-bill | +3.76% |
+| 4-week T-bill | +3.72% |
 
 ## Running evaluation (pre-registered; see PREREG.md)
 
@@ -19,12 +19,12 @@
 - Mean net spread: n/a (Newey-West 95% CI n/a to n/a, t=nan)
 - Mean gross spread: n/a; days net-positive: n/a
 - Daily Sharpe of net spread: nan; PSR(SR*=0): nan
-- Hours observed: 1 / 1 (0 missing)
+- Hours observed: 2 / 3 (1 missing)
 
 ## Kill / go criteria status
 
 - ⏳ ≥60 complete days: 0/60
-- ✅ missing hours ≤ 20%: 0.0% missing
+- ⏳ missing hours ≤ 20%: 33.3% missing
 - ⏳ mean net spread ≥ 2%: n/a
 - ⏳ Newey-West 95% CI excludes 0: n/a
 - ⏳ days net-positive ≥ 60%: n/a
@@ -34,4 +34,4 @@
 
 | date | hrs | funding | basis | net | cboe | cme |
 |---|---|---|---|---|---|---|
-| 2026-09-04 | 1 | +2.63% | +7.75% | -7.10% | n/a | n/a |
+| 2026-09-04 | 2 | +2.63% | +8.05% | -7.41% | -1.87% | n/a |

@@ -1,2 +1,2 @@
 date,funding_apr,hours_observed,front_product,front_days_to_expiry,basis_apr,basis_hours,spread_gross_apr,cost_drag_apr,spread_net_apr,cboe_funding_apr,cme_front_symbol,cme_basis_apr,rf_apr,spot_close,computed_at
-2026-09-04,0.02628,1,BIT-25SEP26-CDE,20.833333,0.077466938,1,-0.051186938,0.019820663,-0.071007601,,,,0.0376,79805.88,2026-09-04T19:30:51Z
+2026-09-04,0.02628,2,BIT-25SEP26-CDE,20.8125,0.080532991,2,-0.054252991,0.01982311,-0.074076101,-0.018652621,,,0.0372,79785.78,2026-09-04T21:24:37Z
