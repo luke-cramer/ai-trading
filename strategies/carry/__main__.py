@@ -28,6 +28,9 @@ def main(argv: list[str] | None = None) -> int:
         except Exception as e:
             alerts.send(f"carry ingest FAILED: {e}", level="error")
             raise
+        from strategies.carry import tables as T
+        for t in (T.FUNDING, T.DATED, T.SPOT, T.CBOE, T.TREASURY, T.CME):
+            t.compact()  # collapse duplicate keys left by union merges between writers
         print(json.dumps(s))
         noisy = [e for e in s.get("errors", []) if not e.startswith("cme:")]
         if noisy:

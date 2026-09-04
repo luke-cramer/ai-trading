@@ -33,8 +33,13 @@ class Table:
         for r in rows:
             by_part.setdefault(self._partition(str(r[self.columns[0]])), []).append(r)
         for p, new_rows in by_part.items():
-            existing = self._read_partition(p)
-            seen = {tuple(str(r[k]) for k in self.key) for r in existing}
+            raw = self._read_partition(p)
+            existing, seen = [], set()
+            for r in raw:  # union merges can leave duplicate keys; keep the first
+                k = tuple(str(r[c]) for c in self.key)
+                if k not in seen:
+                    seen.add(k)
+                    existing.append(r)
             out = []
             for r in new_rows:
                 k = tuple(str(r[c]) for c in self.key)
@@ -42,7 +47,7 @@ class Table:
                     continue
                 seen.add(k)
                 out.append({c: ("" if r.get(c) is None else r.get(c)) for c in self.columns})
-            if not out:
+            if not out and len(existing) == len(raw):
                 continue
             p.parent.mkdir(parents=True, exist_ok=True)
             merged = sorted(existing + out, key=lambda r: tuple(str(r[k]) for k in self.key))
@@ -52,6 +57,26 @@ class Table:
                 w.writerows(merged)
             inserted += len(out)
         return inserted
+
+    def compact(self) -> int:
+        """Rewrite every partition deduped and sorted (after a union merge). Returns rows dropped."""
+        dropped = 0
+        for p in (sorted(self.dir.glob("*.csv")) if self.dir.exists() else []):
+            raw = self._read_partition(p)
+            seen, keep = set(), []
+            for r in raw:
+                k = tuple(str(r[c]) for c in self.key)
+                if k not in seen:
+                    seen.add(k)
+                    keep.append(r)
+            if len(keep) != len(raw):
+                keep.sort(key=lambda r: tuple(str(r[k]) for k in self.key))
+                with p.open("w", newline="") as f:
+                    w = csv.DictWriter(f, fieldnames=self.columns)
+                    w.writeheader()
+                    w.writerows(keep)
+                dropped += len(raw) - len(keep)
+        return dropped
 
     def read(self) -> pd.DataFrame:
         files = sorted(self.dir.glob("*.csv")) if self.dir.exists() else []

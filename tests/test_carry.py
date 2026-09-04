@@ -26,6 +26,16 @@ def test_table_dedupes_on_key_and_partitions_by_month(tmp_path):
     assert len(df) == 3 and df.iloc[0]["v"] == "1"
 
 
+def test_table_rewrites_duplicate_keys_left_by_union_merge(tmp_path):
+    t = Table("s", "z", ["date", "v"], key=["date"], root=tmp_path)
+    p = tmp_path / "s" / "z" / "2026-09.csv"
+    p.parent.mkdir(parents=True)
+    p.write_text("date,v\n2026-09-01,a\n2026-09-01,b\n2026-09-02,c\n")
+    assert t.compact() == 1
+    assert p.read_text() == "date,v\n2026-09-01,a\n2026-09-02,c\n"
+    assert len(t.read()) == 2
+
+
 def test_table_missing_columns_become_empty(tmp_path):
     t = Table("s", "y", ["date", "a", "b"], key=["date"], root=tmp_path)
     t.append([dict(date="2026-09-04", a=None)])

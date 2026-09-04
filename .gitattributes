@@ -1,0 +1,2 @@
+# Two writers (GitHub Actions + laptop) append to the same month files. Union-merge; Table dedupes by key.
+data/**/*.csv merge=union

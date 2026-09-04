@@ -11,8 +11,13 @@ git add data/
 if ! git diff --cached --quiet; then
   git commit -q -m "data(carry): ingest $(date -u +%Y-%m-%dT%H:%MZ) (laptop)"
   for i in 1 2 3; do
-    git pull --rebase --autostash -q origin main && git push -q origin HEAD:main && exit 0
+    if git pull --rebase --autostash -q origin main; then
+      git push -q origin HEAD:main && exit 0
+    else
+      git rebase --abort || true
+    fi
     sleep $((i * 5))
   done
+  echo "push failed; local commit kept for next run"
   exit 1
 fi
