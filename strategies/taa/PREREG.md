@@ -89,4 +89,6 @@ needs Luke's written approval in a later session, a tax review, a broker with fr
 
 ## Changelog
 
-- v1 (draft 2026-09-05): initial registration. Registers on first backtest run.
+- v1 (registered 2026-09-05): first implementation-check backtest run 2026-09-05T01:19Z on data through 2026-09-03
+  (2008-06-02→2026-09-03: CAGR +9.1%, max drawdown −14.6%; 60/40 +8.7%, −30.4%). Inside the expected range
+  stated above. Parameters frozen from this point.

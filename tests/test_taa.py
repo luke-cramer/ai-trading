@@ -140,6 +140,14 @@ def test_parse_chart_drops_todays_bar_before_close_and_keeps_it_after():
     assert e1 == [dict(date="2024-09-04", symbol="SPY", kind="dividend", value="0.500000", fetched_at=e1[0]["fetched_at"])]
 
 
+def test_parse_chart_unadjusts_yahoo_split_adjusted_closes():
+    ts = [1717162200 + i * 86400 for i in range(4)]               # 2024-05-31 .. 2024-06-03 New York mornings
+    body = _chart(list(zip(ts, [50.0, 50.0, 50.0, 50.0])), splits={"x": {"date": ts[2], "numerator": 2, "denominator": 1}})
+    p, e = ingest.parse_chart(body, datetime(2024, 6, 10, tzinfo=timezone.utc), "IWM")
+    assert [r["close"] for r in p] == ["100.000000", "100.000000", "50.000000", "50.000000"]   # raw pre-split closes restored
+    assert [(r["kind"], r["value"]) for r in e] == [("split", "2.000000")]
+
+
 def test_parse_tiingo_rows_and_events():
     body = json.dumps([
         dict(date="2024-09-04T00:00:00.000Z", close=100.0, volume=10, divCash=0.0, splitFactor=1.0),
@@ -163,3 +171,11 @@ def test_criteria_verdicts():
     assert prereg.criteria_status(base | dict(forward_cagr_vs_6040=-0.05, forward_max_dd=-0.25))[-1][2] == "KILL"
     assert prereg.criteria_status(base | dict(forward_cagr_vs_6040=-0.05, forward_bench_max_dd=-0.05, forward_max_dd=-0.1))[-1][2] == "KILL"
     assert "keep paper" in prereg.criteria_status(base | dict(forward_months=5))[-1][2]
+
+
+def test_simulate_and_fixed_mix_handle_future_start_without_signals():
+    tr = _tr_two_assets()
+    future = "2999-01-31"
+    nav, fills = paper.simulate(tr, pd.DataFrame(), 10_000, start=future)
+    assert nav.empty and fills.empty and list(nav.columns) == ["date", "nav", "cash"]
+    assert paper.fixed_mix(tr, {"A": 1.0}, 10_000, start=future).empty

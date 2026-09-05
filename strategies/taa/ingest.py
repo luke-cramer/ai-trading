@@ -3,6 +3,7 @@ else the Yahoo Finance chart API (unofficial; blocks GitHub runner IPs, so only 
 from __future__ import annotations
 
 import json
+import math
 import os
 import time
 from datetime import datetime, timedelta
@@ -14,7 +15,7 @@ from strategies.taa import tables as T
 
 TIINGO_URL = "https://api.tiingo.com/tiingo/daily/{symbol}/prices?startDate={start}&format=json"
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?period1={p1}&period2=9999999999&interval=1d&events=div,splits"
-BROWSER_UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"}
+BROWSER_UA = {"User-Agent": "Mozilla/5.0"}   # Yahoo rate-limits per UA string; the bare token has survived where a full Chrome UA got 429
 NY = ZoneInfo("America/New_York")
 RECENT_DAYS = 120          # incremental pull window; backfills any gap shorter than this
 CLOSE_FINAL_HOUR = 16.5    # 16:30 NY: a bar dated today is only stored after the close
@@ -25,25 +26,27 @@ def _ny_date(ts: int) -> str:
 
 
 def parse_chart(body: bytes, at: datetime, symbol: str) -> tuple[list[dict], list[dict]]:
-    """Rows for PRICES and EVENTS. Bars for today's NY date are dropped until the session has closed."""
+    """Rows for PRICES and EVENTS. Yahoo closes arrive split-adjusted; they are un-adjusted here so the stored
+    series is raw and immutable (a future split must never change history). Today's bar waits for the close."""
     res = json.loads(body)["chart"]["result"][0]
     ny_now = at.astimezone(NY)
     today = ny_now.strftime("%Y-%m-%d")
     closed = ny_now.hour + ny_now.minute / 60 >= CLOSE_FINAL_HOUR
+    ev = res.get("events") or {}
+    events = []
+    for e in (ev.get("dividends") or {}).values():
+        events.append(dict(date=_ny_date(e["date"]), symbol=symbol, kind="dividend", value=f"{float(e['amount']):.6f}", fetched_at=iso(at)))
+    splits = {_ny_date(e["date"]): float(e["numerator"]) / float(e["denominator"]) for e in (ev.get("splits") or {}).values()}
+    for d, ratio in splits.items():
+        events.append(dict(date=d, symbol=symbol, kind="split", value=f"{ratio:.6f}", fetched_at=iso(at)))
     q = res["indicators"]["quote"][0]
     prices = []
     for ts, c, v in zip(res["timestamp"], q["close"], q.get("volume") or [None] * len(res["timestamp"])):
         d = _ny_date(ts)
         if c is None or (d == today and not closed) or d > today:
             continue
-        prices.append(dict(date=d, symbol=symbol, close=f"{c:.6f}", volume="" if v is None else str(int(v)), fetched_at=iso(at)))
-    events = []
-    ev = res.get("events") or {}
-    for e in (ev.get("dividends") or {}).values():
-        events.append(dict(date=_ny_date(e["date"]), symbol=symbol, kind="dividend", value=f"{float(e['amount']):.6f}", fetched_at=iso(at)))
-    for e in (ev.get("splits") or {}).values():
-        events.append(dict(date=_ny_date(e["date"]), symbol=symbol, kind="split", value=f"{float(e['numerator']) / float(e['denominator']):.6f}",
-                           fetched_at=iso(at)))
+        raw = c * math.prod(r for sd, r in splits.items() if sd > d)
+        prices.append(dict(date=d, symbol=symbol, close=f"{raw:.6f}", volume="" if v is None else str(int(v)), fetched_at=iso(at)))
     return prices, events
 
 

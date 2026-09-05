@@ -20,6 +20,7 @@ TREASURY_URL = ("https://home.treasury.gov/resource-center/data-chart-center/int
 YAHOO_URL = "https://query1.finance.yahoo.com/v8/finance/chart/{symbol}?range=10d&interval=1d"
 BROWSER_UA = {"User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"}
 
+YAHOO_UA = {"User-Agent": "Mozilla/5.0"}   # Yahoo rate-limits per UA string; the bare token survives where a full Chrome UA gets 429
 MONTH_CODES = "FGHJKMNQUVXZ"
 
 
@@ -120,7 +121,7 @@ def ingest_cme(at: datetime) -> dict:
         if i:
             time.sleep(1.5)  # Yahoo rate-limits bursts
         try:
-            r = http.get(YAHOO_URL.format(symbol=sym), headers=BROWSER_UA, retries=2)
+            r = http.get(YAHOO_URL.format(symbol=sym), headers=YAHOO_UA, retries=2)
         except Exception as e:  # cross-check source: never fail the run
             errors.append(f"{sym}: {e}")
             continue

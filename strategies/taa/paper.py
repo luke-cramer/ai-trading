@@ -11,6 +11,10 @@ def simulate(tr: pd.DataFrame, sig: pd.DataFrame, start_nav: float, start: str, 
              one_way_bps: float = costs.ONE_WAY_BPS) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Run the rotation from the first signal date >= start. Returns (nav by date, fills)."""
     dates = list(tr.index)
+    empty = (pd.DataFrame(columns=["date", "nav", "cash"]),
+             pd.DataFrame(columns=["date", "symbol", "weight", "price", "shares", "traded_usd", "cost_usd"]))
+    if sig.empty:
+        return empty
     sig = sig[sig["date"] >= start]
     if end:
         sig = sig[sig["date"] <= end]
@@ -24,7 +28,7 @@ def simulate(tr: pd.DataFrame, sig: pd.DataFrame, start_nav: float, start: str, 
             fill_by_date[later[0]] = grp
     first_fill = min(fill_by_date) if fill_by_date else None
     if first_fill is None:
-        return pd.DataFrame(columns=["date", "nav", "cash"]), pd.DataFrame(columns=["date", "symbol", "weight", "price", "shares", "traded_usd", "cost_usd"])
+        return empty
     for d in dates:
         if d < first_fill or (end and d > end):
             continue
@@ -60,6 +64,6 @@ def fixed_mix(tr: pd.DataFrame, weights: dict[str, float], start_nav: float, sta
     me_dates = [d for d in tr.index if d >= start]
     ym = pd.to_datetime(pd.Index(me_dates)).strftime("%Y-%m")
     last_of_month = pd.Series(me_dates).groupby(ym.values).last().tolist()[:-1]
-    sig = pd.DataFrame([dict(date=d, symbol=s, weight=w) for d in last_of_month for s, w in weights.items()])
+    sig = pd.DataFrame([dict(date=d, symbol=s, weight=w) for d in last_of_month for s, w in weights.items()], columns=["date", "symbol", "weight"])
     nav, _ = simulate(tr, sig, start_nav, start, end, one_way_bps)
     return nav
