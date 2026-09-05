@@ -30,9 +30,13 @@ python3 -m venv .venv && .venv/bin/pip install pandas numpy pytest   # once
 .venv/bin/python -m strategies.carry check-stale   # exit 1 + alert if newest funding print > 3h old
 .venv/bin/python -m strategies.carry replay        # recompute daily table from stored CSVs, print stats
 .venv/bin/python -m strategies.carry status        # row counts and newest timestamps
+.venv/bin/python -m strategies.taa ingest [--full] # ETF closes/dividends (Tiingo if TIINGO_TOKEN set, else Yahoo)
+.venv/bin/python -m strategies.taa report          # signals, paper ledger, NAV, reports/taa/; posts on rebalance days
+.venv/bin/python -m strategies.taa replay          # evaluation + PREREG criteria
 ```
 
-Env: `ALERT_WEBHOOK_URL` (Slack or Discord incoming webhook; unset → alerts print to stderr).
+Env: `ALERT_WEBHOOK_URL` (Slack or Discord incoming webhook; unset → alerts print to stderr), `TIINGO_TOKEN` (build #1 prices),
+`HEALTHCHECK_URL` (workflow heartbeat).
 Local timezone is America/Los_Angeles; everything stored is UTC.
 
 ## Layout
@@ -42,10 +46,11 @@ harness/            shared, strategy-agnostic: clock (UTC), http (retries), rawl
                     storage (month-partitioned CSV tables deduped on key), alerts (one webhook)
 strategies/carry/   build #2: tables.py (schemas) → ingest.py → signal.py (daily spread) → report.py
                     costs.py (cost model), prereg.py + PREREG.md (frozen evaluation), check.py (stale)
-strategies/taa/     build #1 (not started)      strategies/xs_gbm/   build #4 (not started)
+strategies/taa/     build #1: tables → ingest (Tiingo/Yahoo) → signal (HAA) → paper (fills, NAV) → report; PREREG.md
+strategies/xs_gbm/  build #4 (not started)
 data/carry/<table>/YYYY-MM.csv   committed datasets      data/raw/carry/YYYY/MM/DD/   gz raw responses
 reports/carry/YYYY-MM-DD.md      daily reports (+ latest.md)
-.github/workflows/  carry-ingest (every 10 min + cron-job.org dispatch), carry-report (00:20 UTC), tests
+.github/workflows/  carry-ingest (every 10 min + cron-job.org dispatch), carry-report (00:20 UTC), taa-daily (22:45 UTC weekdays, schedule commented out until carry is verified), tests
 bin/carry-local.sh  laptop backup writer (launchd/ has the plist); same store, dedupes with the GHA job
 research/           phase-1 corpus (read-only)
 ```
@@ -66,3 +71,6 @@ Every build follows the same shape: ingestion → signal → paper/live executio
 - Coinbase Advanced Trade public products endpoint: free, no key, gives hourly funding + dated futures. Primary.
 - cmegroup.com: blocks scripts and its terms prohibit automation. Never scrape it. CME closes come from Yahoo (unofficial, cross-check only).
 - Coinbase funding-history web page: 403 to scripts. We build our own history; outages lose hours permanently.
+- Yahoo Finance chart API: works from a laptop, returns 429 to GitHub runner IPs. Tiingo (free token) is build #1's primary.
+- GitHub cron is unreliable here (hours of silence on 2026-09-04). Every scheduled workflow must also be dispatchable and
+  covered by the cron-job.org dispatcher + healthchecks heartbeat described in README.

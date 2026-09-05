@@ -23,8 +23,10 @@ REPORT.md ranks this #1 because it is $0/month, unlevered, and has decades of ou
 
 ## Data
 
-- Daily unadjusted closes, cash dividends and splits from the Yahoo Finance chart API (`v8/finance/chart`,
-  unofficial, free, verified live 2026-09-04: SPY daily bars from 1993-01-29 with dividend events).
+- Daily unadjusted closes, cash dividends and splits. Primary: Tiingo daily prices API (official, free token,
+  history from the 1990s). Fallback / cross-check: Yahoo Finance chart API (`v8/finance/chart`, unofficial, free,
+  verified live 2026-09-04: SPY daily bars from 1993-01-29 with dividend events; it 429s GitHub runner IPs, so
+  it is only usable from a laptop). Both feed the same tables and the same total-return construction.
 - Total-return prices are rebuilt by us: on each ex-date, prior closes are multiplied by `1 − dividend / prior close`
   (and divided by the split ratio). Yahoo's own adjusted close is not stored because it changes retroactively.
 - A bar dated "today" (New York) is only stored after 16:30 New York. Stored closes are never overwritten.

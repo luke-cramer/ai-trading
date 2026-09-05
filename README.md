@@ -6,7 +6,7 @@ picked three parallel builds. Phase 2 builds them one at a time on a shared harn
 | Build | Status | What it does |
 |---|---|---|
 | #2 Crypto carry measurement | **running unattended** | Logs Coinbase Derivatives hourly funding vs the same venue's dated-future basis for 60–90 days, then a pre-registered go/no-go. Zero capital. |
-| #1 ETF dual-momentum / TAA | not started | Long-only monthly rotation with canary assets, paper first. |
+| #1 ETF dual-momentum / TAA | **built, schedule off** | HAA-Balanced monthly rotation (8 offensive ETFs, IEF/BIL defensive, TIP canary), $10k paper ledger, pre-registered in `strategies/taa/PREREG.md`. Daily job enabled once #2 has run a full day unattended. |
 | #4 Cross-sectional GBM + LLM features | not started | Daily ranking of liquid US names, forward-only, paper first. |
 
 Paper and logging only. No live brokerage, no real money, no leverage.
@@ -20,6 +20,8 @@ GitHub Actions is the scheduler; the repo is the database.
   more than 3 hours old, and commits.
 - `carry-report` runs daily at 00:20 UTC (17:20 Pacific). It recomputes `data/carry/daily/`, writes
   `reports/carry/YYYY-MM-DD.md` (also `latest.md`), posts a one-line summary to the webhook, and commits.
+- `taa-daily` (build #1) runs weekdays at 22:45 UTC after the NY close once enabled: pulls closes, recomputes
+  signals and the paper NAV, writes `reports/taa/latest.md`, posts to the webhook only on rebalance days.
 - `tests` runs pytest on every code push.
 
 Any failure posts to the webhook and shows up in the Actions tab. A missed hour is a permanent gap
@@ -61,6 +63,9 @@ python3 -m venv .venv && .venv/bin/pip install pandas numpy pytest
 .venv/bin/python -m strategies.carry report --no-post
 .venv/bin/python -m strategies.carry replay
 .venv/bin/python -m strategies.carry status
+.venv/bin/python -m strategies.taa ingest --full     # first run: full ETF history (needs TIINGO_TOKEN or a laptop IP for Yahoo)
+.venv/bin/python -m strategies.taa report --no-post  # signals, paper ledger, NAV, reports/taa/latest.md
+.venv/bin/python -m strategies.taa replay            # evaluation + pre-registered criteria
 ```
 
 Copy `.env.example` to `.env` and export `ALERT_WEBHOOK_URL` to test alerts locally.
@@ -93,7 +98,9 @@ Nothing is decided before 60 complete days. The daily report is monitoring, not 
    Discord incoming-webhook URL. Until then alerts print into the workflow log only.
 2. **Set the healthchecks secret** `HEALTHCHECK_URL` and the cron-job.org dispatcher, as described above.
 3. The repo is public: never commit `.env`, tokens, or account details. Secrets live in GitHub settings only.
-4. Later builds will need accounts (Alpaca paper for #1 and #4). Nothing here needs one.
+4. **Build #1 needs a Tiingo token.** Free account at <https://www.tiingo.com>, copy the API token, add it as
+   repo secret `TIINGO_TOKEN`. Yahoo returns 429 to GitHub runner IPs, so without it `taa-daily` fails.
+5. Later builds will need accounts (Alpaca paper for #1 and #4). Nothing here needs one.
 
 ## Data sources
 
@@ -106,5 +113,7 @@ Nothing is decided before 60 complete days. The daily report is monitoring, not 
 | `treasury` | Treasury daily bill rates (4-week coupon equivalent = risk-free) | daily |
 | `cme` | CME BTC monthly closes via Yahoo Finance (unofficial, cross-check only) | daily |
 | `daily` | derived: funding APR, front-month basis APR, gross and net spread, cross-checks | daily, replayable |
+| `taa/prices`, `taa/events` | Tiingo daily prices API (primary, free token); Yahoo chart API (laptop fallback) | daily |
+| `taa/signals`, `taa/ledger`, `taa/nav` | derived: month-end momentum and weights, paper fills, daily NAV vs 60/40 and SPY | replayable |
 
 cmegroup.com itself blocks automation and its terms prohibit it; it is not used.

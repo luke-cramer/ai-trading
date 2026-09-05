@@ -24,6 +24,7 @@ jobs:
     timeout-minutes: 20
     env:
       ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+      TIINGO_TOKEN: ${{ secrets.TIINGO_TOKEN }}   # Yahoo blocks GitHub runner IPs; without this the job fails
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5

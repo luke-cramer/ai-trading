@@ -140,6 +140,20 @@ def test_parse_chart_drops_todays_bar_before_close_and_keeps_it_after():
     assert e1 == [dict(date="2024-09-04", symbol="SPY", kind="dividend", value="0.500000", fetched_at=e1[0]["fetched_at"])]
 
 
+def test_parse_tiingo_rows_and_events():
+    body = json.dumps([
+        dict(date="2024-09-04T00:00:00.000Z", close=100.0, volume=10, divCash=0.0, splitFactor=1.0),
+        dict(date="2024-09-05T00:00:00.000Z", close=101.0, volume=11, divCash=0.25, splitFactor=1.0),
+        dict(date="2024-09-06T00:00:00.000Z", close=50.0, volume=12, divCash=0.0, splitFactor=2.0),
+    ]).encode()
+    at = datetime(2024, 9, 6, 15, 0, tzinfo=timezone.utc)                 # 11:00 New York, session open: drop today's bar
+    p, e = ingest.parse_tiingo(body, at, "SPY")
+    assert [r["date"] for r in p] == ["2024-09-04", "2024-09-05"]
+    assert [(r["kind"], r["value"]) for r in e] == [("dividend", "0.250000")]
+    p2, e2 = ingest.parse_tiingo(body, datetime(2024, 9, 6, 22, 0, tzinfo=timezone.utc), "SPY")
+    assert len(p2) == 3 and ("split", "2.000000") in [(r["kind"], r["value"]) for r in e2]
+
+
 # ---------- criteria ----------
 
 def test_criteria_verdicts():
