@@ -10,15 +10,18 @@ DATA_ROOT = Path("data")
 
 
 class Table:
-    def __init__(self, strategy: str, name: str, columns: list[str], key: list[str], root: Path = DATA_ROOT):
+    def __init__(self, strategy: str, name: str, columns: list[str], key: list[str], root: Path = DATA_ROOT,
+                 partition: str = "month"):
         assert all(k in columns for k in key)
+        assert partition in ("month", "year")
         assert columns[0].endswith("_time") or columns[0] in ("date",), "first column must be the UTC timestamp/date used for partitioning"
         self.dir = root / strategy / name
         self.columns = columns
         self.key = key
+        self.partition = partition
 
     def _partition(self, ts: str) -> Path:
-        return self.dir / f"{ts[:7]}.csv"
+        return self.dir / f"{ts[:7] if self.partition == 'month' else ts[:4]}.csv"
 
     def _read_partition(self, p: Path) -> list[dict]:
         if not p.exists():
@@ -57,6 +60,13 @@ class Table:
                 w.writerows(merged)
             inserted += len(out)
         return inserted
+
+    def replace(self, rows: list[dict]) -> int:
+        """Rewrite the whole table from rows (for derived tables that are recomputed, not appended)."""
+        if self.dir.exists():
+            for p in self.dir.glob("*.csv"):
+                p.unlink()
+        return self.append(rows)
 
     def compact(self) -> int:
         """Rewrite every partition deduped and sorted (after a union merge). Returns rows dropped."""

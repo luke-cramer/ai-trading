@@ -171,39 +171,5 @@ def compute_daily(funding: pd.DataFrame, dated: pd.DataFrame, spot: pd.DataFrame
     return out.fillna("")
 
 
-# ---------- statistics used by the evaluation (fixed in PREREG.md) ----------
-
-def newey_west_mean(x: np.ndarray, lags: int = 5) -> tuple[float, float, float]:
-    """Mean, HAC standard error (Bartlett kernel), t-stat. Handles autocorrelated daily spreads."""
-    x = np.asarray(x, dtype=float)
-    x = x[~np.isnan(x)]
-    n = len(x)
-    if n < 2:
-        return (float(x.mean()) if n else float("nan"), float("nan"), float("nan"))
-    e = x - x.mean()
-    s = float(e @ e) / n
-    for k in range(1, min(lags, n - 1) + 1):
-        w = 1 - k / (lags + 1)
-        s += 2 * w * float(e[k:] @ e[:-k]) / n
-    se = math.sqrt(max(s, 0.0) / n)
-    m = float(x.mean())
-    return m, se, (m / se if se > 0 else float("nan"))
-
-
-def probabilistic_sharpe(x: np.ndarray, benchmark_sr: float = 0.0) -> tuple[float, float]:
-    """Bailey & Lopez de Prado PSR on the daily series. With one pre-registered trial the deflated SR equals PSR.
-
-    Returns (daily Sharpe, PSR). Sharpe here is of the daily *spread* series, i.e. the strategy's return if held 1x.
-    """
-    x = np.asarray(x, dtype=float)
-    x = x[~np.isnan(x)]
-    n = len(x)
-    if n < 3 or x.std(ddof=1) == 0:
-        return float("nan"), float("nan")
-    sr = x.mean() / x.std(ddof=1)
-    z = (x - x.mean()) / x.std(ddof=1)
-    skew = float((z**3).mean())
-    kurt = float((z**4).mean())
-    denom = math.sqrt(max(1 - skew * sr + (kurt - 1) / 4 * sr**2, 1e-12))
-    stat = (sr - benchmark_sr) * math.sqrt(n - 1) / denom
-    return float(sr), float(0.5 * (1 + math.erf(stat / math.sqrt(2))))
+# Statistics live in harness.stats; re-exported so PREREG references and tests keep working.
+from harness.stats import newey_west_mean, probabilistic_sharpe  # noqa: E402,F401
