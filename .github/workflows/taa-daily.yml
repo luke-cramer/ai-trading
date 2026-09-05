@@ -1,0 +1,57 @@
+name: taa-daily
+# Weekdays after the NY close: pull closes, recompute signals/paper NAV, post only on rebalance days.
+# Schedule is off until carry (#2) has run a full day unattended; dispatch manually until then.
+on:
+  # schedule:
+  #   - cron: "45 22 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      full:
+        description: "fetch full price history (first run / repair)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: taa-data
+  cancel-in-progress: false
+
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      ALERT_WEBHOOK_URL: ${{ secrets.ALERT_WEBHOOK_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -q pandas numpy
+      - name: Ingest prices and events
+        run: python -m strategies.taa ingest ${{ inputs.full && '--full' || '' }}
+      - name: Report (signals, ledger, NAV)
+        run: python -m strategies.taa report
+      - name: Commit data and reports
+        run: |
+          git config user.name "carry-bot"
+          git config user.email "carry-bot@users.noreply.github.com"
+          git add data/ reports/taa/
+          git diff --cached --quiet && echo "no changes" && exit 0
+          git commit -q -m "data(taa): daily $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git pull --rebase -q origin main && git push -q origin HEAD:main && exit 0
+            sleep $((i * 5))
+          done
+          exit 1
+      - name: Alert on failure
+        if: failure()
+        run: |
+          python - <<'PY'
+          import os
+          from harness import alerts
+          alerts.send(f"taa-daily workflow FAILED: {os.environ.get('GITHUB_SERVER_URL')}/{os.environ.get('GITHUB_REPOSITORY')}/actions/runs/{os.environ.get('GITHUB_RUN_ID')}", level="error")
+          PY
