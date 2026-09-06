@@ -1,4 +1,4 @@
-# Carry measurement — daily report 2026-09-06 (generated 2026-09-06T00:45:16Z)
+# Carry measurement — daily report 2026-09-06 (generated 2026-09-06T04:48:21Z)
 
 ## Latest day: 2026-09-05 (UTC)
 
@@ -19,12 +19,12 @@
 - Mean net spread: -5.28% (Newey-West 95% CI n/a to n/a, t=nan)
 - Mean gross spread: -3.29%; days net-positive: +0.00%
 - Daily Sharpe of net spread: nan; PSR(SR*=0): nan
-- Hours observed: 29 / 30 (1 missing)
+- Hours observed: 33 / 34 (1 missing)
 
 ## Kill / go criteria status
 
 - ⏳ ≥60 complete days: 1/60
-- ✅ missing hours ≤ 20%: 3.3% missing
+- ✅ missing hours ≤ 20%: 2.9% missing
 - ⏳ mean net spread ≥ 2%: -5.28%
 - ⏳ Newey-West 95% CI excludes 0: n/a
 - ⏳ days net-positive ≥ 60%: 0%
@@ -36,4 +36,4 @@
 |---|---|---|---|---|---|---|
 | 2026-09-04 | 4 | +3.50% | +8.02% | -6.50% | -1.87% | +5.69% |
 | 2026-09-05 | 24 | +4.12% | +7.42% | -5.28% | n/a | +2.33% |
-| 2026-09-06 | 1 | +5.26% | +8.31% | -5.04% | n/a | n/a |
+| 2026-09-06 | 5 | +5.08% | +8.27% | -5.16% | n/a | -2.68% |
