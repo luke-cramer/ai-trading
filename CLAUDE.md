@@ -50,7 +50,7 @@ strategies/taa/     build #1: tables → ingest (Tiingo/Yahoo) → signal (HAA) 
 strategies/xs_gbm/  build #4 (not started)
 data/carry/<table>/YYYY-MM.csv   committed datasets      data/raw/carry/YYYY/MM/DD/   gz raw responses
 reports/carry/YYYY-MM-DD.md      daily reports (+ latest.md)
-.github/workflows/  carry-ingest (every 10 min + cron-job.org dispatch), carry-report (00:20 UTC), taa-daily (22:45 UTC weekdays, schedule commented out until carry is verified), tests
+.github/workflows/  carry-ingest, carry-report, taa-daily: all workflow_dispatch only, fired by cron-job.org (15 min / 00:25 UTC / weekdays 22:45 UTC); tests
 bin/carry-local.sh  laptop backup writer (launchd/ has the plist); same store, dedupes with the GHA job
 research/           phase-1 corpus (read-only)
 ```
@@ -72,5 +72,5 @@ Every build follows the same shape: ingestion → signal → paper/live executio
 - cmegroup.com: blocks scripts and its terms prohibit automation. Never scrape it. CME closes come from Yahoo (unofficial, cross-check only).
 - Coinbase funding-history web page: 403 to scripts. We build our own history; outages lose hours permanently.
 - Yahoo Finance chart API: works from a laptop, returns 429 to GitHub runner IPs. Tiingo (free token) is build #1's primary.
-- GitHub cron is unreliable here (hours of silence on 2026-09-04). Every scheduled workflow must also be dispatchable and
-  covered by the cron-job.org dispatcher + healthchecks heartbeat described in README.
+- GitHub `schedule:` is best-effort (~7 fires/day of 144 here) and was removed 2026-09-10. Never add it back; every
+  workflow is `workflow_dispatch` only, fired by cron-job.org (Luke's account) and watched by the healthchecks heartbeat in README.

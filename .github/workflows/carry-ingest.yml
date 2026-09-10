@@ -1,9 +1,7 @@
 name: carry-ingest
-# Every 10 min (public repo, minutes are free): the venue shows only its latest hourly print, so each hour
-# just needs one successful pull before the next print replaces it. cron-job.org dispatches as a backup (README).
+# Dispatched by cron-job.org every 15 min (README): the venue shows only its latest hourly print, so each
+# hour needs one successful pull. GitHub's own cron was dropped 2026-09-10: it fired ~7 times a day, not 144.
 on:
-  schedule:
-    - cron: "3,13,23,33,43,53 * * * *"
   workflow_dispatch:
 
 permissions:

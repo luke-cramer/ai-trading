@@ -1,9 +1,7 @@
 name: taa-daily
 # Weekdays after the NY close: pull closes, recompute signals/paper NAV, post only on rebalance days.
-# Schedule is off until carry (#2) has run a full day unattended; dispatch manually until then.
+# Not yet wired to cron-job.org (needs TIINGO_TOKEN first); dispatch manually until then. No GitHub cron, ever.
 on:
-  # schedule:
-  #   - cron: "45 22 * * 1-5"
   workflow_dispatch:
     inputs:
       full:

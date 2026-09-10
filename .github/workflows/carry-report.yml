@@ -1,8 +1,7 @@
 name: carry-report
-# Daily at 00:20 UTC (17:20 Pacific): recompute the daily series, write the markdown report, post the summary.
+# Dispatched by cron-job.org daily at 00:25 UTC (17:25 Pacific): recompute the daily series, write the
+# markdown report, post the summary. No GitHub cron (see carry-ingest.yml).
 on:
-  schedule:
-    - cron: "20 0 * * *"
   workflow_dispatch:
 
 permissions:

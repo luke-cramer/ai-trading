@@ -13,12 +13,12 @@ Paper and logging only. No live brokerage, no real money, no leverage.
 
 ## How it runs
 
-GitHub Actions is the scheduler; the repo is the database.
+GitHub Actions runs the jobs, cron-job.org triggers them, the repo is the database.
 
-- `carry-ingest` runs every 10 minutes (plus external dispatches, see below). It pulls all sources, appends deduped rows under
+- `carry-ingest` runs every 15 minutes (dispatched by cron-job.org, see below). It pulls all sources, appends deduped rows under
   `data/carry/`, gzips the raw responses under `data/raw/carry/`, fails loudly if the newest funding print is
   more than 3 hours old, and commits.
-- `carry-report` runs daily at 00:20 UTC (17:20 Pacific). It recomputes `data/carry/daily/`, writes
+- `carry-report` runs daily at 00:25 UTC (17:25 Pacific). It recomputes `data/carry/daily/`, writes
   `reports/carry/YYYY-MM-DD.md` (also `latest.md`), posts a one-line summary to the webhook, and commits.
 - `taa-daily` (build #1) runs weekdays at 22:45 UTC after the NY close once enabled: pulls closes, recomputes
   signals and the paper NAV, writes `reports/taa/latest.md`, posts to the webhook only on rebalance days.
@@ -27,13 +27,12 @@ GitHub Actions is the scheduler; the repo is the database.
 Any failure posts to the webhook and shows up in the Actions tab. A missed hour is a permanent gap
 (the venue publishes no history), which is why ingest runs so often.
 
-### Two schedulers and a dead man's switch
+### External scheduler and a dead man's switch
 
-GitHub's cron is best-effort: on 2026-09-04 it ran nothing for four hours, then started (it also skipped
-a 5-minute canary entirely). Three things cover that, and each is independent of the others:
+GitHub's `schedule:` trigger is best-effort and here it fired about 7 times a day against 144 slots, with
+the daily report landing 4.5 h late. It was removed on 2026-09-10; workflows are `workflow_dispatch` only.
 
-1. **GitHub cron** every 10 minutes (the repo is public, so Actions minutes are unlimited).
-2. **cron-job.org** (free) dispatches the same workflows through the GitHub API every 15 minutes. Setup:
+1. **cron-job.org** (free) dispatches the workflows through the GitHub API. Setup:
    - Token: <https://github.com/settings/personal-access-tokens/new>. Name `carry-dispatch`, expiration
      1 year, Repository access → *Only select repositories* → `ai-trading`, Repository permissions →
      *Actions: Read and write*. Copy it; it lives only in cron-job.org.
@@ -47,10 +46,10 @@ a 5-minute canary entirely). Three things cover that, and each is independent of
 
    - A test run returns HTTP 204 (empty body) and a `workflow_dispatch` run appears in the Actions tab.
      Duplicate runs are harmless: rows dedupe on timestamp and the concurrency group serializes commits.
-   - Calendar the token expiry. When it lapses only GitHub's cron remains.
+   - Calendar the token expiry. When it lapses nothing runs; healthchecks will tell you within 90 minutes.
    - Status: both jobs live since 2026-09-10 (job ids 8426776, 8426809); token `carry-dispatch` expires 2027-09-10.
      The cron-job.org URL field ignores browser autofill: click it and type. Test run is on the job edit page.
-3. **healthchecks.io** (free) as a dead man's switch. The ingest job pings a URL after every success (and
+2. **healthchecks.io** (free) as a dead man's switch. The ingest job pings a URL after every success (and
    `/fail` on failure); if no ping arrives for 90 minutes healthchecks messages you. This is what catches
    scheduler silence, which the in-job stale check cannot. Setup: create a check with period 10 min,
    grace 80 min, add your Slack (or email) integration, then set the ping URL as the repo secret
