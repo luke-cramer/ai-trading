@@ -48,6 +48,8 @@ a 5-minute canary entirely). Three things cover that, and each is independent of
    - A test run returns HTTP 204 (empty body) and a `workflow_dispatch` run appears in the Actions tab.
      Duplicate runs are harmless: rows dedupe on timestamp and the concurrency group serializes commits.
    - Calendar the token expiry. When it lapses only GitHub's cron remains.
+   - Status: both jobs live since 2026-09-10 (job ids 8426776, 8426809); token `carry-dispatch` expires 2027-09-10.
+     The cron-job.org URL field ignores browser autofill: click it and type. Test run is on the job edit page.
 3. **healthchecks.io** (free) as a dead man's switch. The ingest job pings a URL after every success (and
    `/fail` on failure); if no ping arrives for 90 minutes healthchecks messages you. This is what catches
    scheduler silence, which the in-job stale check cannot. Setup: create a check with period 10 min,
@@ -96,7 +98,7 @@ Nothing is decided before 60 complete days. The daily report is monitoring, not 
 
 1. **Set the webhook secret** in the repo (Settings → Secrets → Actions → `ALERT_WEBHOOK_URL`), a Slack or
    Discord incoming-webhook URL. Until then alerts print into the workflow log only.
-2. **Set the healthchecks secret** `HEALTHCHECK_URL` and the cron-job.org dispatcher, as described above.
+2. **Set the healthchecks secret** `HEALTHCHECK_URL` as described above. (cron-job.org dispatcher: done 2026-09-10.)
 3. The repo is public: never commit `.env`, tokens, or account details. Secrets live in GitHub settings only.
 4. **Build #1 needs a Tiingo token.** Free account at <https://www.tiingo.com>, copy the API token, add it as
    repo secret `TIINGO_TOKEN`. Yahoo returns 429 to GitHub runner IPs, so without it `taa-daily` fails.
