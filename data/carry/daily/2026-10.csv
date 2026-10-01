@@ -1,0 +1,2 @@
+date,funding_apr,hours_observed,front_product,front_days_to_expiry,basis_apr,basis_hours,spread_gross_apr,cost_drag_apr,spread_net_apr,cboe_funding_apr,cme_front_symbol,cme_basis_apr,rf_apr,spot_close,computed_at
+2026-10-01,0.06132,1,BIT-30OCT26-CDE,29.666667,0.067036075,1,-0.0057160751,0.018931112,-0.024647187,,BTCV26.CME,0.03035113,0.0391,83504.04,2026-10-01T00:25:57Z
