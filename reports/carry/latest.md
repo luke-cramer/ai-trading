@@ -1,4 +1,4 @@
-# Carry measurement — daily report 2026-10-24 (generated 2026-10-24T00:25:58Z)
+# Carry measurement — daily report 2026-10-25 (generated 2026-10-25T00:25:55Z)
 
 ## Latest day: 2026-10-23 (UTC)
 
@@ -15,16 +15,16 @@
 
 ## Running evaluation (pre-registered; see PREREG.md)
 
-- Days logged: 51 of 60 target; complete days (≥20h): 45; days with a spread: 45
+- Days logged: 52 of 60 target; complete days (≥20h): 45; days with a spread: 45
 - Mean net spread: -2.01% (Newey-West 95% CI -4.49% to +0.47%, t=-1.59)
 - Mean gross spread: -0.08%; days net-positive: +31.11%
 - Daily Sharpe of net spread: -0.417; PSR(SR*=0): 0.010
-- Hours observed: 1115 / 1182 (67 missing)
+- Hours observed: 1130 / 1206 (76 missing)
 
 ## Kill / go criteria status
 
 - ⏳ ≥60 complete days: 45/60
-- ✅ missing hours ≤ 20%: 5.7% missing
+- ✅ missing hours ≤ 20%: 6.3% missing
 - ⏳ mean net spread ≥ 2%: -2.01%
 - ⏳ Newey-West 95% CI excludes 0: low -4.49%
 - ⏳ days net-positive ≥ 60%: 31%
@@ -34,7 +34,6 @@
 
 | date | hrs | funding | basis | net | cboe | cme |
 |---|---|---|---|---|---|---|
-| 2026-10-15 | 24 | +10.91% | +6.81% | +2.16% | +3.46% | -13.52% |
 | 2026-10-16 | 23 | +11.62% | +6.08% | +3.60% | +1.38% | +26.52% |
 | 2026-10-17 | 24 | +13.21% | +5.55% | +5.72% | n/a | n/a |
 | 2026-10-18 | 24 | +16.61% | +4.58% | +10.09% | n/a | +21.57% |
@@ -43,4 +42,5 @@
 | 2026-10-21 | 24 | +7.37% | +8.48% | -3.00% | +5.08% | -58.34% |
 | 2026-10-22 | 24 | +9.56% | +7.29% | +0.35% | +3.50% | +150.53% |
 | 2026-10-23 | 23 | +5.98% | +4.60% | -0.56% | +2.89% | -3.25% |
-| 2026-10-24 | 1 | +13.14% | +6.48% | +4.71% | n/a | n/a |
+| 2026-10-24 | 15 | +18.98% | +6.56% | +10.45% | n/a | +7.60% |
+| 2026-10-25 | 1 | +20.15% | +5.87% | +12.32% | n/a | n/a |
