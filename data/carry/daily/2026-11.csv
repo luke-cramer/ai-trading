@@ -1,0 +1,2 @@
+date,funding_apr,hours_observed,front_product,front_days_to_expiry,basis_apr,basis_hours,spread_gross_apr,cost_drag_apr,spread_net_apr,cboe_funding_apr,cme_front_symbol,cme_basis_apr,rf_apr,spot_close,computed_at
+2026-11-01,-0.06132,1,BIT-27NOV26-CDE,26.666667,0.071584359,1,-0.13290436,0.020430599,-0.15333496,,,,0.0398,77394.04,2026-11-01T00:25:56Z
