@@ -1,40 +1,39 @@
-# Carry measurement — daily report 2026-11-08 (generated 2026-11-08T00:25:50Z)
+# Carry measurement — daily report 2026-11-09 (generated 2026-11-09T00:25:58Z)
 
-## Latest day: 2026-11-07 (UTC)
+## Latest day: 2026-11-08 (UTC)
 
 | metric | value |
 |---|---|
-| BIP funding APR | +5.18% (24/24 hours) |
-| BIT front basis APR | +7.39% (BIT-27NOV26-CDE, 20.2 dte, 24 hrs) |
-| spread gross | -2.21% |
+| BIP funding APR | +4.67% (24/24 hours) |
+| BIT front basis APR | +7.68% (BIT-27NOV26-CDE, 19.2 dte, 24 hrs) |
+| spread gross | -3.01% |
 | cost drag | +2.09% |
-| **spread net** | **-4.29%** |
+| **spread net** | **-5.10%** |
 | Cboe PBT funding APR (cross-check) | n/a |
-| CME front basis APR (cross-check, n/a) | n/a |
+| CME front basis APR (cross-check, BTCX26.CME) | +0.48% |
 | 4-week T-bill | +3.95% |
 
 ## Running evaluation (pre-registered; see PREREG.md)
 
-- Days logged: 66 of 60 target; complete days (≥20h): 59; days with a spread: 59
-- Mean net spread: -2.35% (Newey-West 95% CI -4.51% to -0.18%, t=-2.13)
-- Mean gross spread: -0.40%; days net-positive: +30.51%
-- Daily Sharpe of net spread: -0.448; PSR(SR*=0): 0.001
-- Hours observed: 1462 / 1542 (80 missing)
+- Days logged: 67 of 60 target; complete days (≥20h): 60; days with a spread: 60
+- Mean net spread: -2.39% (Newey-West 95% CI -4.52% to -0.26%, t=-2.20)
+- Mean gross spread: -0.44%; days net-positive: +30.00%
+- Daily Sharpe of net spread: -0.460; PSR(SR*=0): 0.001
+- Hours observed: 1486 / 1566 (80 missing)
 
 ## Kill / go criteria status
 
-- ⏳ ≥60 complete days: 59/60
-- ✅ missing hours ≤ 20%: 5.2% missing
-- ⏳ mean net spread ≥ 2%: -2.35%
-- ⏳ Newey-West 95% CI excludes 0: low -4.51%
-- ⏳ days net-positive ≥ 60%: 31%
-- ⏳ verdict: not yet — keep measuring
+- ✅ ≥60 complete days: 60/60
+- ✅ missing hours ≤ 20%: 5.1% missing
+- ⏳ mean net spread ≥ 2%: -2.39%
+- ⏳ Newey-West 95% CI excludes 0: low -4.52%
+- ⏳ days net-positive ≥ 60%: 30%
+- ⏳ verdict: KILL: no tradeable spread — publish the dataset, do not trade
 
 ## Last 10 days
 
 | date | hrs | funding | basis | net | cboe | cme |
 |---|---|---|---|---|---|---|
-| 2026-10-30 | 21 | +5.38% | +5.64% | -2.30% | -7.72% | +12.95% |
 | 2026-10-31 | 24 | -5.22% | +7.65% | -14.92% | n/a | +5.67% |
 | 2026-11-01 | 24 | -4.60% | +8.13% | -14.76% | n/a | n/a |
 | 2026-11-02 | 24 | +0.95% | +7.87% | -8.95% | -7.10% | +27.08% |
@@ -43,4 +42,5 @@
 | 2026-11-05 | 24 | +14.45% | +8.20% | +4.24% | +3.07% | +98.14% |
 | 2026-11-06 | 23 | +6.70% | +7.26% | -2.65% | -7.36% | +10.25% |
 | 2026-11-07 | 24 | +5.18% | +7.39% | -4.29% | n/a | n/a |
-| 2026-11-08 | 1 | +5.26% | +7.07% | -3.90% | n/a | +3.62% |
+| 2026-11-08 | 24 | +4.67% | +7.68% | -5.10% | n/a | +0.48% |
+| 2026-11-09 | 1 | +6.13% | +4.27% | -0.25% | n/a | +13.94% |
