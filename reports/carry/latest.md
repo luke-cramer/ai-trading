@@ -1,32 +1,32 @@
-# Carry measurement — daily report 2026-11-21 (generated 2026-11-21T00:25:56Z)
+# Carry measurement — daily report 2026-11-22 (generated 2026-11-22T00:25:52Z)
 
-## Latest day: 2026-11-20 (UTC)
+## Latest day: 2026-11-21 (UTC)
 
 | metric | value |
 |---|---|
-| BIP funding APR | -1.68% (23/24 hours) |
-| BIT front basis APR | +2.69% (BIT-24DEC26-CDE, 13.4 dte, 22 hrs) |
-| spread gross | -4.37% |
-| cost drag | +2.60% |
-| **spread net** | **-6.97%** |
-| Cboe PBT funding APR (cross-check) | -7.81% |
-| CME front basis APR (cross-check, BTCX26.CME) | +278.42% |
+| BIP funding APR | -1.82% (24/24 hours) |
+| BIT front basis APR | +6.47% (BIT-24DEC26-CDE, 33.2 dte, 24 hrs) |
+| spread gross | -8.30% |
+| cost drag | +2.69% |
+| **spread net** | **-10.99%** |
+| Cboe PBT funding APR (cross-check) | n/a |
+| CME front basis APR (cross-check, BTCZ26.CME) | +4.16% |
 | 4-week T-bill | +4.11% |
 
 ## Running evaluation (pre-registered; see PREREG.md)
 
-- Days logged: 79 of 60 target; complete days (≥20h): 72; days with a spread: 72
-- Mean net spread: -2.87% (Newey-West 95% CI -4.77% to -0.98%, t=-2.97)
-- Mean gross spread: -0.86%; days net-positive: +25.00%
-- Daily Sharpe of net spread: -0.573; PSR(SR*=0): 0.000
-- Hours observed: 1772 / 1854 (82 missing)
+- Days logged: 80 of 60 target; complete days (≥20h): 73; days with a spread: 73
+- Mean net spread: -2.99% (Newey-West 95% CI -4.91% to -1.06%, t=-3.04)
+- Mean gross spread: -0.96%; days net-positive: +24.66%
+- Daily Sharpe of net spread: -0.589; PSR(SR*=0): 0.000
+- Hours observed: 1796 / 1878 (82 missing)
 
 ## Kill / go criteria status
 
-- ✅ ≥60 complete days: 72/60
+- ✅ ≥60 complete days: 73/60
 - ✅ missing hours ≤ 20%: 4.4% missing
-- ⏳ mean net spread ≥ 2%: -2.87%
-- ⏳ Newey-West 95% CI excludes 0: low -4.77%
+- ⏳ mean net spread ≥ 2%: -2.99%
+- ⏳ Newey-West 95% CI excludes 0: low -4.91%
 - ⏳ days net-positive ≥ 60%: 25%
 - ⏳ verdict: KILL: no tradeable spread — publish the dataset, do not trade
 
@@ -34,7 +34,6 @@
 
 | date | hrs | funding | basis | net | cboe | cme |
 |---|---|---|---|---|---|---|
-| 2026-11-12 | 24 | +3.91% | +5.75% | -4.02% | -9.21% | +76.14% |
 | 2026-11-13 | 23 | +7.05% | +4.88% | -0.12% | -6.57% | +83.97% |
 | 2026-11-14 | 24 | -0.36% | +6.09% | -8.83% | n/a | +103.03% |
 | 2026-11-15 | 24 | +2.08% | +4.69% | -5.06% | n/a | -20.23% |
@@ -43,4 +42,5 @@
 | 2026-11-18 | 24 | -1.72% | +2.47% | -6.67% | -15.47% | +131.13% |
 | 2026-11-19 | 24 | -6.93% | +2.10% | -11.54% | -14.47% | +44.19% |
 | 2026-11-20 | 23 | -1.68% | +2.69% | -6.97% | -7.81% | +278.42% |
-| 2026-11-21 | 1 | -6.13% | +5.89% | -14.71% | n/a | n/a |
+| 2026-11-21 | 24 | -1.82% | +6.47% | -10.99% | n/a | +4.16% |
+| 2026-11-22 | 1 | +0.00% | +7.76% | -10.40% | n/a | n/a |
